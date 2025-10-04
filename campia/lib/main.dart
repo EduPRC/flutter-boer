@@ -6,12 +6,12 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: const FirebaseOptions(
-      apiKey: "AIzaSyB3YBYpyiXylBCoYjVRlU32V2zyrnDeWO4",
-      authDomain: "campiagpx.firebaseapp.com",
-      projectId: "campiagpx",
-      storageBucket: "campiagpx.firebasestorage.app",
-      messagingSenderId: "363935290218",
-      appId: "1:363935290218:web:3f84fff0c5a5bd91f4cb13"
+      apiKey: "",
+      authDomain: "",
+      projectId: "",
+      storageBucket: "",
+      messagingSenderId: "",
+      appId: ""
     ),
   );
   runApp(const MyApp());
