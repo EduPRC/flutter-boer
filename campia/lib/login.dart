@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'menu_user.dart';
+import 'register.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -10,23 +13,43 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _senhaController = TextEditingController();
 
-  void _doLogin() {
+  bool _isLoading = false;
+
+  Future<void> _fazerLogin() async {
     if (_formKey.currentState!.validate()) {
-      String email = _emailController.text;
-      String password = _passwordController.text;
+      try {
+        setState(() => _isLoading = true);
 
-      // Por enquanto, login é apenas simulado
-      if (email == "teste@campia.com" && password == "1234") {
+        await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: _emailController.text.trim(),
+          password: _senhaController.text.trim(),
+        );
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Login realizado com sucesso!")),
         );
-        Navigator.pop(context); // Fecha a tela de login
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Email ou senha incorretos.")),
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const MenuUser()),
         );
+      } on FirebaseAuthException catch (e) {
+        String mensagemErro;
+        if (e.code == 'user-not-found') {
+          mensagemErro = "Usuário não encontrado.";
+        } else if (e.code == 'wrong-password') {
+          mensagemErro = "Senha incorreta.";
+        } else {
+          mensagemErro = "Erro ao logar: ${e.message}";
+        }
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(mensagemErro)),
+        );
+      } finally {
+        setState(() => _isLoading = false);
       }
     }
   }
@@ -34,76 +57,60 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Login"),
-        centerTitle: true,
-        backgroundColor: const Color.fromARGB(255, 54, 167, 9),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Campo de e-mail
-              TextFormField(
-                controller: _emailController,
-                decoration: const InputDecoration(
-                  labelText: "E-mail",
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.email),
+      appBar: AppBar(title: const Text("Login")),
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextFormField(
+                  controller: _emailController,
+                  decoration: const InputDecoration(labelText: "Email"),
+                  keyboardType: TextInputType.emailAddress,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return "Digite seu email";
+                    }
+                    if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
+                      return "Digite um email válido";
+                    }
+                    return null;
+                  },
                 ),
-                keyboardType: TextInputType.emailAddress,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return "Digite seu e-mail";
-                  }
-                  if (!value.contains("@")) {
-                    return "Digite um e-mail válido";
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 20),
-
-              // Campo de senha
-              TextFormField(
-                controller: _passwordController,
-                decoration: const InputDecoration(
-                  labelText: "Senha",
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.lock),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _senhaController,
+                  decoration: const InputDecoration(labelText: "Senha"),
+                  obscureText: true,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return "Digite sua senha";
+                    }
+                    return null;
+                  },
                 ),
-                obscureText: true,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return "Digite sua senha";
-                  }
-                  if (value.length < 4) {
-                    return "A senha deve ter no mínimo 4 caracteres";
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 20),
-
-              // Botão de login
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _doLogin,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromARGB(255, 54, 167, 9),
-                    padding: const EdgeInsets.symmetric(vertical: 15),
-                  ),
-                  child: const Text(
-                    "Entrar",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
+                const SizedBox(height: 24),
+                _isLoading
+                    ? const CircularProgressIndicator()
+                    : ElevatedButton(
+                        onPressed: _fazerLogin,
+                        child: const Text("Entrar"),
+                      ),
+                const SizedBox(height: 16),
+                TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const RegisterScreen()),
+                    );
+                  },
+                  child: const Text("Não tem conta? Cadastre-se"),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

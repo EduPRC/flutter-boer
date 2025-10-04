@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import "login.dart";
+import 'escrever_screen.dart';
+import 'service_list_screen.dart';
+import 'settings_screen.dart';
+import 'profile_screen.dart';
  
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -119,29 +123,51 @@ class HomeScreen extends StatelessWidget {
                   _buildFeatureCard(
                     icon: Icons.note,
                     title: "Escrever",
-                    color: Color.fromARGB(255, 7, 165, 33),
+                    color: const Color.fromARGB(255, 7, 165, 33),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const EscreverScreen()),
+                      );
+                    },
                   ),
                   _buildFeatureCard(
                     icon: Icons.book,
                     title: "Poemas",
                     color: Colors.black,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => ServiceListScreen()),
+                      );
+                    },
                   ),
                   _buildFeatureCard(
                     icon: Icons.person,
                     title: "Perfil",
-                    color: Color.fromARGB(255, 7, 165, 33),
+                    color: const Color.fromARGB(255, 7, 165, 33),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const ProfileScreen()),
+                      );
+                    },
                   ),
                   _buildFeatureCard(
                     icon: Icons.support_agent,
                     title: "Suporte",
                     color: Colors.grey[900]!,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const SettingsScreen()),
+                      );
+                    },
                   ),
                 ],
               ),
  
               const SizedBox(height: 30),
- 
-              // 🔹 Mensagem de boas-vindas
               Card(
                 color: Colors.white,
                 elevation: 6,
@@ -153,7 +179,7 @@ class HomeScreen extends StatelessWidget {
                   child: Text(
                     "Bem-vindo ao App de Poemas!\n\n"
                     "Aqui você pode escrever e publicar seus poemas "
-                    "de forma prática, rápida.",
+                    "de forma prática e rápida.",
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
@@ -172,31 +198,30 @@ class HomeScreen extends StatelessWidget {
  
   // 🔹 Widget auxiliar para cards
   Widget _buildFeatureCard({
-    required IconData icon,
-    required String title,
-    required Color color,
-  }) {
-    return Card(
-      color: color,
-      elevation: 6,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 50, color: Colors.white),
-            const SizedBox(height: 12),
-            Text(
-              title,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
+  required IconData icon,
+  required String title,
+  required Color color,
+  required VoidCallback onTap,
+}) {
+  return GestureDetector(
+    onTap: onTap,
+    child: Container(
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(12),
       ),
-    );
-  }
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, size: 48, color: Colors.white),
+          const SizedBox(height: 8),
+          Text(
+            title,
+            style: const TextStyle(color: Colors.white, fontSize: 16),
+          ),
+        ],
+      ),
+    ),
+  );
+}
 }
